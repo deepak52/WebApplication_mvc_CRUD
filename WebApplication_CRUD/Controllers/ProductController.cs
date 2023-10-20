@@ -73,18 +73,18 @@ namespace WebApplication_CRUD.Controllers
         // GET: Product/Edit/5
         public ActionResult Edit(int id)
         {
-            var products = Product_DAL.GetProductsByID(id).FirstOrDefault();
+            var product = Product_DAL.GetProductsByID(id).FirstOrDefault();
 
-            if(products == null)
+            if(product == null)
             {
                 TempData["InfoMessage"] = "products not available with id " + id.ToString();
                 return RedirectToAction("Index");
             }
-            return View(products);
+            return View(product);
         }
 
         // POST: Product/Edit/5
-        [HttpPost]
+        [HttpPost, ActionName("Edit")]
         public ActionResult UpdateProduct(Product product)
         {
             try
@@ -116,21 +116,48 @@ namespace WebApplication_CRUD.Controllers
         // GET: Product/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            try
+            {
+                var product = Product_DAL.GetProductsByID(id).FirstOrDefault();
+
+                if (product == null)
+                {
+                    TempData["InfoMessage"] = "products not available with id " + id.ToString();
+                    return RedirectToAction("Index");
+                }
+                return View(product);
+
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }
         }
 
         // POST: Product/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        [HttpPost,ActionName("Delete")]
+        public ActionResult DeleteConfirmation(int id)
         {
             try
             {
                 // TODO: Add delete logic here
+                string result = Product_DAL.DeleteProduct(id);
+
+                if (result.Contains("deleted"))
+                {
+                    TempData["SuccessMessage"] = result;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = result;
+                }
 
                 return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
+                TempData["ErrorMessage"] = ex.Message;
                 return View();
             }
         }

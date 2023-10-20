@@ -12,6 +12,7 @@ namespace WebApplication_CRUD.DataAccesLayer
     public class Product_DAL
     {
         string conString = ConfigurationManager.ConnectionStrings["adoConnectionString"].ToString();
+        private object sqlDbType;
 
         //get all products
 
@@ -138,6 +139,28 @@ namespace WebApplication_CRUD.DataAccesLayer
             {
                 return false;
             }
+        }
+
+        //Delete Product
+
+        public string DeleteProduct(int productID)
+        {
+            string result = "";
+
+            using (SqlConnection connection = new SqlConnection(conString))
+            {
+                SqlCommand command = new SqlCommand("DeleteProducts_SP", connection);
+                command.CommandType= CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@productID",productID);
+                command.Parameters.Add("@OutPutMessage", SqlDbType.VarChar, 50).Direction = ParameterDirection.Output;
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                result = command.Parameters["@OutPutMessage"].Value.ToString();
+                connection.Close();
+            }
+
+            return result;
         }
     }
 }
